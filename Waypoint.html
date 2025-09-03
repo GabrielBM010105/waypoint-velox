@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waypoint Velox</title>
+    <!-- External libraries for styling and animations -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Base styling with dark theme as default */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.light-theme {
+            background: #efefef;
+            color: #343a40;
+        }
+        h1 {
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+        .light-theme h1 {
+            color: #343a40;
+        }
+        .card {
+            background: #161616;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s, color 0.3s, transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .light-theme .card {
+            background: #ffffff;
+            color: #343a40;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-control {
+            background: #353535;
+            border: 1px solid #444;
+            color: #f8f9fa;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        .light-theme .form-control {
+            background: #ffffff;
+            border-color: #ced4da;
+            color: #343a40;
+        }
+        .form-control::placeholder {
+            color: #f8f9fa;
+            opacity: 1;
+        }
+        .light-theme .form-control::placeholder {
+            color: #6c757d;
+        }
+        .btn-primary {
+            background: #630f0f;
+            border: none;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .light-theme .btn-primary {
+            background: #617569;
+            border: none;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .btn-primary:hover {
+            background: #3a0909;
+            transform: scale(1.05);
+        }
+        .light-theme .btn-primary:hover {
+            background: #414d46;
+            transform: scale(1.05);
+        }
+        .btn-primary:active {
+            background: #3a0909 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+        }
+        .light-theme .btn-primary:active {
+            background: #414d46 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 15px;
+            margin-top: 0;
+            transition: box-shadow 0.3s;
+        }
+        #map:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .info-card {
+            background: #161616;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 0;
+            text-align: center;
+            transition: background 0.3s, color 0.3s;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .light-theme .info-card {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .info-card h3 {
+            margin: 10px 0;
+            font-weight: 600;
+            text-align: center;
+            transition: color 0.3s;
+        }
+        .info-card p {
+            margin: 0;
+            font-size: 18px;
+            transition: color 0.3s;
+            text-align: center;
+        }
+        .directions-card {
+            background: #161616;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 10px;
+            transition: background 0.3s, color 0.3s;
+            max-height: 500px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        .light-theme .directions-card {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .directions-card h3 {
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+            transition: color 0.3s;
+        }
+        .directions-card ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: left;
+        }
+        .directions-card li {
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #161616;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s, color 0.3s;
+        }
+        .light-theme .footer {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+            color: #fffbf7;
+            transition: color 0.3s;
+        }
+        .light-theme .footer p {
+            color: #343a40;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        .directions-card::-webkit-scrollbar {
+            width: 10px;
+        }
+        .directions-card::-webkit-scrollbar-track {
+            background: #2d2d2d;
+            border-radius: 10px;
+        }
+        .directions-card::-webkit-scrollbar-thumb {
+            background: #630f0f;
+            border-radius: 10px;
+        }
+        .directions-card::-webkit-scrollbar-thumb:hover {
+            background: #3a0909;
+        }
+        .light-theme .directions-card::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+        .light-theme .directions-card::-webkit-scrollbar-thumb {
+            background: #617569;
+        }
+        .light-theme .directions-card::-webkit-scrollbar-thumb:hover {
+            background: #414d46;
+        }
+        .about-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: #161616;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s, color 0.3s;
+        }
+        .light-theme .about-section {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .about-section h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: color 0.3s;
+        }
+        .about-section p {
+            font-size: 16px;
+            line-height: 1.6;
+            transition: color 0.3s;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .about-section p strong {
+            font-weight: 700;
+        }
+        .about-section a {
+            color: #630f0f;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .about-section a:hover {
+            color: #3a0909;
+        }
+        .light-theme .about-section a {
+            color: #617569;
+        }
+        .light-theme .about-section a:hover {
+            color: #414d46;
+        }
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+            .col-md-8, .col-md-4 {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            #map {
+                height: 300px;
+            }
+            .info-card, .directions-card {
+                margin-top: 10px;
+            }
+            h1 {
+                font-size: 40px;
+                padding-top: 40px;
+            }
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            .transport-mode {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .transport-mode button {
+                width: 100%;
+            }
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        .light-theme .loading-spinner {
+            border-top-color: #343a40;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .switch-button {
+            background: #630f0f;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+        }
+        .switch-button:hover {
+            background: #3a0909;
+            transform: rotate(180deg);
+        }
+        .light-theme .switch-button {
+            background: #617569;
+        }
+        .light-theme .switch-button:hover {
+            background: #414d46;
+        }
+        .easter-egg {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: color 0.3s;
+        }
+        .easter-egg:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .light-theme .easter-egg {
+            color: rgba(0, 0, 0, 0.5);
+        }
+        .light-theme .easter-egg:hover {
+            color: rgba(0, 0, 0, 0.8);
+        }
+        .animate-fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-in-out;
+        }
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .transport-mode {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .transport-mode button {
+            background: #353535;
+            border: none;
+            color: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .transport-mode button.active {
+            background: #630f0f;
+            border: 2px solid #fff;
+            font-weight: bold;
+        }
+        .light-theme .transport-mode button.active {
+            background: #414d46;
+            border: 2px solid #617569;
+            color: #ffffff;
+        }
+        .transport-mode button:not(.active) {
+            background: #353535;
+            color: #f8f9fa;
+            opacity: 0.7;
+        }
+        .light-theme .transport-mode button:not(.active) {
+            background: #ffffff;
+            color: #6c757d;
+            opacity: 1;
+        }
+        .warning-icon {
+            position: relative;
+            display: inline-block;
+            margin-left: 10px;
+            cursor: pointer;
+            color: #ffcc00;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        .warning-icon:hover {
+            color: #ff9900;
+        }
+        .warning-icon .tooltip {
+            visibility: hidden;
+            width: 200px;
+            background: #353535;
+            color: #f8f9fa;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .warning-icon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .light-theme .warning-icon .tooltip {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .directions-card {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .directions-card.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .directions-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reset-button {
+            background: #630f0f;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            font-weight: 600;
+        }
+        .reset-button:hover {
+            background: #3a0909;
+            transform: scale(1.05);
+        }
+        .light-theme .reset-button {
+            background: #617569;
+        }
+        .light-theme .reset-button:hover {
+            background: #414d46;
+        }
+        .directions-card {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .directions-card.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .directions-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        .transport-mode button {
+            transition: background 0.3s, transform 0.3s, opacity 0.3s;
+        }
+        .transport-mode button:not(.active) {
+            opacity: 0.7;
+        }
+        .transport-mode button.active {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        /* Disclaimer Pop-Up Styles */
+        .disclaimer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .disclaimer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .disclaimer-popup {
+            background: #161616;
+            color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+        .disclaimer-overlay.active .disclaimer-popup {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .light-theme .disclaimer-popup {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .disclaimer-popup h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 576px) {
+            .disclaimer-popup h2 {
+                font-size: 20px;
+            }
+        }
+        .disclaimer-popup p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .disclaimer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .disclaimer-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .disclaimer-buttons button.accept {
+            background: #630f0f;
+            color: #ffffff;
+        }
+        .disclaimer-buttons button.decline {
+            background: #353535;
+            color: #ffffff;
+        }
+        .light-theme .disclaimer-buttons button.accept {
+            background: #617569;
+        }
+        .light-theme .disclaimer-buttons button.decline {
+            background: #f8f9fa;
+            color: #343a40;
+        }
+        .disclaimer-buttons button:hover {
+            transform: scale(1.05);
+        }
+        .disclaimer-buttons button:active {
+            transform: scale(0.95);
+        }
+        .api-key-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #161616;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .light-theme .api-key-container {
+            background: #ffffff;
+            color: #343a40;
+        }
+        .api-key-container p {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <!-- Disclaimer Overlay -->
+    <div class="disclaimer-overlay" id="disclaimerOverlay">
+        <div class="disclaimer-popup animate__animated animate__fadeIn">
+            <h2>🚧 Site Under Development 🚧</h2>
+            <p>
+                Welcome to Waypoint Velox! This site is currently in early development, and we are fine-tuning the logic every day to improve your experience. <strong>Please be patient with us</strong> as we work to make this tool as reliable and safe as possible.
+            </p>
+            <p>
+                We plan to integrate data from various APIs and user-submitted information to enhance route safety. However, <strong>please remember that no mapping service is perfect</strong>. Always use common sense and stay aware of your surroundings while navigating.
+            </p>
+            <p>
+                By using this site, you acknowledge that <strong>we are not responsible for any issues or incidents</strong> that may arise from following the provided routes. Thank you for your understanding and support as we continue to improve!
+            </p>
+            <div class="disclaimer-buttons">
+                <button class="accept">Accept</button>
+                <button class="decline">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Easter Egg -->
+    <div class="easter-egg" onclick="window.open('https://www.youtube.com/watch?v=SB1NGyWxvlA&autoplay=1&start=0&loop=1', '_blank');">.</div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="btn btn-secondary animate-pulse">☀️ Light Mode</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="animate__animated animate__fadeIn" style="font-size: 60px;"><b>Waypoint Velox</b></h1>
+        <p class="animate__animated animate__fadeIn" style="font-size: 22px; text-align: center;">Navigate the Safest Routes for Cyclists</p>
+        
+        <!-- API Key Notice for Open Source Users -->
+        <div class="api-key-container animate__animated animate__fadeIn">
+            <p><strong>Open Source Notice:</strong> To use this application, you need to provide your own Google Maps API key.</p>
+            <p>Add your key in the script tag at the bottom of this file where indicated.</p>
+        </div>
+        
+        <div class="transport-mode animate__animated animate__fadeInUp">
+            <button id="bikeOnly" class="active">🚴‍♂️ Bike Only</button>
+            <button id="bikeTransit">🚴‍♂️ + 🚌 Bike & Transit
+                <span class="warning-icon">⚠️
+                    <span class="tooltip">Before using public transit, check if your bike is supported and fits on buses or trains in your area.</span>
+                </span>
+            </button>
+        </div>
+        <div class="row animate__animated animate__fadeInUp">
+            <div class="col-md-8">
+                <div class="card p-4 animate-slide-up">
+                    <form id="routeForm" class="row g-3">
+                        <div class="col-md-5">
+                            <input type="text" id="start" class="form-control animate-fade-in" placeholder="Start Location" required>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-center justify-content-center">
+                            <button type="button" id="switchButton" class="switch-button animate-fade-in">⇄</button>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" id="end" class="form-control animate-fade-in" placeholder="End Location" required>
+                        </div>
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary w-100 animate-fade-in">Plan Route</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card animate-slide-up" id="eta">
+                    <h3>⏱️ ETA & Distance</h3>
+                    <div id="etaDetails"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row animate__animated animate__fadeInUp">
+            <div class="col-md-8">
+                <div class="card p-3 animate-slide-up">
+                    <div id="map"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="directions-card animate-slide-up visible" id="directions">
+                    <h3 id="directionsTitle">🚴‍♂️ Turn-by-Turn Directions</h3>
+                    <ul id="directionsList"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <button id="resetButton" class="reset-button animate-fade-in">🔄 Reset Everything</button>
+        </div>
+        <div class="about-section animate__animated animate__fadeInUp">
+            <h2>About</h2>
+            <p>
+                In many places around the world, <strong>biking on the sidewalk is illegal</strong>, forcing cyclists to ride in the road unless proper bike infrastructure is provided. This creates unsafe conditions and frustration for both cyclists and drivers.
+            </p>
+            <p>
+                In cities like <a href="https://www.youtube.com/watch?v=qW5lz4wFZxE&autoplay=1&start=0&loop=1" target="_blank"><strong>Marietta, Georgia</strong></a>, and many others, inadequate bike lanes and poor infrastructure contribute to accidents, injuries, and even fatalities. Between <strong>2013 and 2023</strong>, <a href="https://abettercobb.com/" target="_blank"><strong>Cobb County</strong></a> alone saw over <strong>500 bicycle accidents</strong>, resulting in <strong>five fatalities</strong> and <strong>31 serious injuries</strong>.
+            </p>
+            <p>
+                This site aims to bridge that gap by mapping the safest routes, raising awareness about bike safety, and advocating for better infrastructure to make cycling safer and more accessible for everyone, no matter where they are.
+            </p>
+        </div>
+        <div class="footer animate__animated animate__fadeInUp">
+            <p>
+                © 2183 Citadel Council. All rights reserved. Unauthorized reproduction or distribution of this material across any of the Citadel races is strictly prohibited by the Intergalactic Code of Conduct. The Citadel and Spectre logos are trademarks of the Citadel Council. All other trademarks are the property of their respective species.
+            </p>
+        </div>
+    </div>
+
+    <!-- External Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Google Maps API - IMPORTANT: Replace YOUR_API_KEY with your actual Google Maps API key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMap" async defer></script>
+
+    <script>
+        // Cookie Management Functions
+        /**
+         * Sets a cookie with the given name, value, and expiration days
+         * @param {string} name - The name of the cookie
+         * @param {string} value - The value to store in the cookie
+         * @param {number} days - Number of days until the cookie expires
+         */
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        /**
+         * Retrieves a cookie value by name
+         * @param {string} name - The name of the cookie to retrieve
+         * @returns {string} The cookie value or empty string if not found
+         */
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.startsWith(cookieName)) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+
+        // Disclaimer Logic
+        const disclaimerOverlay = document.getElementById("disclaimerOverlay");
+        const acceptButton = document.querySelector(".disclaimer-buttons .accept");
+        const declineButton = document.querySelector(".disclaimer-buttons .decline");
+
+        // Check if the user has already accepted the disclaimer
+        if (getCookie("disclaimerAccepted") === "true") {
+            disclaimerOverlay.classList.remove("active");
+        } else {
+            disclaimerOverlay.classList.add("active");
+        }
+
+        // Handle Accept Button
+        acceptButton.addEventListener("click", () => {
+            setCookie("disclaimerAccepted", "true", 365); // Store acceptance for 1 year
+            disclaimerOverlay.classList.remove("active");
+        });
+
+        // Handle Decline Button
+        declineButton.addEventListener("click", () => {
+            const url = "https://www.youtube.com/watch?v=xvFZjo5PgG0&autoplay=1&start=0&loop=1";
+            window.location.href = url;
+        });
+
+        // Map and Route Logic
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let autocompleteStart;
+        let autocompleteEnd;
+        let bikeLayer;
+        let travelMode = "BICYCLING";
+
+        /**
+         * Initializes the Google Map and related services
+         * This function is called by the Google Maps API when it loads
+         */
+        function initMap() {
+            // Initialize the map centered on a default location
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 33.9526, lng: -84.5499 }, // Default to Marietta, GA
+                zoom: 13,
+                mapTypeId: 'hybrid',
+            });
+
+            // Initialize directions service and renderer
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                polylineOptions: {
+                    strokeColor: "#007bff",
+                    strokeOpacity: 1.0,
+                    strokeWeight: 4,
+                },
+            });
+
+            // Initialize autocomplete for start and end inputs
+            autocompleteStart = new google.maps.places.Autocomplete(document.getElementById("start"));
+            autocompleteEnd = new google.maps.places.Autocomplete(document.getElementById("end"));
+
+            // Enable the BicyclingLayer to show bike routes
+            bikeLayer = new google.maps.BicyclingLayer();
+            bikeLayer.setMap(map);
+        }
+
+        /**
+         * Formats minutes into a human-readable duration string
+         * @param {number} minutes - The duration in minutes
+         * @returns {string} Formatted duration string
+         */
+        function formatETA(minutes) {
+            const days = Math.floor(minutes / 1440);
+            const hours = Math.floor((minutes % 1440) / 60);
+            const mins = minutes % 60;
+            let result = [];
+            if (days > 0) result.push(`${days} day${days > 1 ? 's' : ''}`);
+            if (hours > 0) result.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+            if (mins > 0) result.push(`${mins} minute${mins > 1 ? 's' : ''}`);
+            return result.join(' ');
+        }
+
+        /**
+         * Gets the user's timezone using the Internationalization API
+         * @returns {string} The user's timezone
+         */
+        function getUserTimeZone() {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+
+        /**
+         * Calculates and formats the arrival time based on minutes from now
+         * @param {number} minutes - Minutes from current time until arrival
+         * @returns {string} Formatted arrival time string with timezone
+         */
+        function formatArrivalTime(minutes) {
+            const now = new Date();
+            const arrivalTime = new Date(now.getTime() + minutes * 60000);
+            const timeZone = getUserTimeZone();
+            const options = { hour: '2-digit', minute: '2-digit', timeZone };
+            if (arrivalTime.getDate() !== now.getDate()) {
+                options.day = 'numeric';
+                options.month = 'short';
+            }
+            return arrivalTime.toLocaleTimeString([], options) + ` (${timeZone})`;
+        }
+
+        /**
+         * Displays a loading spinner in the ETA and directions sections
+         */
+        function showLoading() {
+            document.getElementById("etaDetails").innerHTML = `<div class="loading-spinner"></div>`;
+            document.getElementById("directionsList").innerHTML = `<div class="loading-spinner"></div>`;
+        }
+
+        /**
+         * Displays an error message in the ETA and directions sections
+         * @param {string} message - The error message to display
+         */
+        function showError(message) {
+            document.getElementById("etaDetails").innerHTML = `<p class="text-danger">${message}</p>`;
+            document.getElementById("directionsList").innerHTML = `<p class="text-danger">${message}</p>`;
+        }
+
+        /**
+         * Resets the map by creating a new directions renderer
+         */
+        function resetMap() {
+            directionsRenderer.setMap(null);
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                polylineOptions: {
+                    strokeColor: "#007bff",
+                    strokeOpacity: 1.0,
+                    strokeWeight: 4,
+                },
+            });
+        }
+
+        /**
+         * Resets all input fields and clears the map and directions
+         */
+        function resetEverything() {
+            document.getElementById("start").value = "";
+            document.getElementById("end").value = "";
+            document.getElementById("etaDetails").innerHTML = "";
+            document.getElementById("directionsList").innerHTML = "";
+            resetMap();
+        }
+
+        /**
+         * Updates the directions card title based on the current travel mode
+         */
+        function toggleDirectionsCard() {
+            const directionsCard = document.getElementById("directions");
+            if (travelMode === "BICYCLING") {
+                directionsCard.querySelector("#directionsTitle").textContent = "🚴‍♂️ Turn-by-Turn Directions";
+                directionsCard.classList.remove("hidden");
+                directionsCard.classList.add("visible");
+            } else if (travelMode === "TRANSIT") {
+                directionsCard.querySelector("#directionsTitle").textContent = "🚌 Transit Details";
+                directionsCard.classList.remove("hidden");
+                directionsCard.classList.add("visible");
+            }
+        }
+
+        /**
+         * Calculates and displays the route between start and end locations
+         */
+        async function plotRoute() {
+            const start = document.getElementById("start").value;
+            const end = document.getElementById("end").value;
+
+            // Validate inputs
+            if (!start || !end) {
+                showError("Please enter both start and end locations.");
+                return;
+            }
+
+            showLoading();
+
+            // Prepare the directions request
+            const request = {
+                origin: start,
+                destination: end,
+                travelMode: travelMode,
+            };
+
+            try {
+                // Get route from Google Maps API
+                const result = await new Promise((resolve, reject) => {
+                    directionsService.route(request, (result, status) => {
+                        if (status === "OK") resolve(result);
+                        else reject(new Error("Failed to fetch route data. Please check your locations and try again."));
+                    });
+                });
+
+                // Display the route on the map
+                directionsRenderer.setDirections(result);
+
+                const route = result.routes[0].legs[0];
+                const directionsList = document.getElementById("directionsList");
+                directionsList.innerHTML = "";
+
+                // Process and display directions based on travel mode
+                if (travelMode === "BICYCLING") {
+                    route.steps.forEach((step, index) => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `<strong>Step ${index + 1}:</strong> ${step.instructions}`;
+                        directionsList.appendChild(li);
+                    });
+                } else if (travelMode === "TRANSIT") {
+                    route.steps.forEach((step, index) => {
+                        const li = document.createElement("li");
+                        if (step.travel_mode === "TRANSIT") {
+                            li.innerHTML = `
+                                <strong>${step.transit.line.vehicle.name} ${step.transit.line.name}</strong><br>
+                                <strong>Departure:</strong> ${step.transit.departure_time.text}<br>
+                                <strong>Arrival:</strong> ${step.transit.arrival_time.text}<br>
+                                <strong>From:</strong> ${step.transit.departure_stop.name}<br>
+                                <strong>To:</strong> ${step.transit.arrival_stop.name}
+                            `;
+                        } else {
+                            li.innerHTML = `<strong>Step ${index + 1}:</strong> ${step.instructions}`;
+                        }
+                        directionsList.appendChild(li);
+                    });
+                }
+
+                // Get distance matrix for ETA and distance information
+                const distanceMatrixService = new google.maps.DistanceMatrixService();
+                const response = await new Promise((resolve, reject) => {
+                    distanceMatrixService.getDistanceMatrix({
+                        origins: [start],
+                        destinations: [end],
+                        travelMode: travelMode,
+                    }, (response, status) => {
+                        if (status === "OK") resolve(response);
+                        else reject(new Error("Failed to fetch ETA and distance information."));
+                    });
+                });
+
+                // Display ETA and distance information
+                const etaMinutes = Math.floor(response.rows[0].elements[0].duration.value / 60);
+                const distanceMiles = (response.rows[0].elements[0].distance.value / 1609.34).toFixed(2);
+                const arrivalTime = formatArrivalTime(etaMinutes);
+                document.getElementById("etaDetails").innerHTML = `
+                    <strong>ETA:</strong> ${formatETA(etaMinutes)}<br>
+                    <strong>Distance:</strong> ${distanceMiles} miles<br>
+                    <strong>Arrival Time:</strong> ${arrivalTime}
+                `;
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Event Listeners
+        document.getElementById("routeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await plotRoute();
+        });
+
+        document.getElementById("themeToggle").addEventListener("click", () => {
+            document.body.classList.toggle("light-theme");
+            document.getElementById("themeToggle").textContent = document.body.classList.contains("light-theme") ? "🌙 Dark Mode" : "☀️ Light Mode";
+        });
+
+        document.getElementById("switchButton").addEventListener("click", () => {
+            const startInput = document.getElementById("start");
+            const endInput = document.getElementById("end");
+            const temp = startInput.value;
+            startInput.value = endInput.value;
+            endInput.value = temp;
+        });
+
+        document.getElementById("bikeOnly").addEventListener("click", async () => {
+            travelMode = "BICYCLING";
+            document.getElementById("bikeOnly").classList.add("active");
+            document.getElementById("bikeTransit").classList.remove("active");
+            toggleDirectionsCard();
+            if (document.getElementById("start").value && document.getElementById("end").value) {
+                await plotRoute();
+            }
+        });
+
+        document.getElementById("bikeTransit").addEventListener("click", async () => {
+            travelMode = "TRANSIT";
+            document.getElementById("bikeTransit").classList.add("active");
+            document.getElementById("bikeOnly").classList.remove("active");
+            toggleDirectionsCard();
+            if (document.getElementById("start").value && document.getElementById("end").value) {
+                await plotRoute();
+            }
+        });
+
+        document.getElementById("resetButton").addEventListener("click", () => {
+            resetEverything();
+        });
+    </script>
+</body>
+</html>
